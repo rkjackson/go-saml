@@ -25,7 +25,7 @@ func TestRequest(t *testing.T) {
 	assert.NoError(err)
 	assert.NotEmpty(signedXml)
 
-	err = Verify(signedXml, "./default.crt")
+	_, err = Verify(signedXml, "./default.crt")
 	assert.NoError(err)
 }
 
@@ -46,6 +46,6 @@ func TestResponse(t *testing.T) {
 	assert.NoError(err)
 	assert.NotEmpty(signedXml)
 
-	err = Verify(signedXml, "./default.crt")
+	_, err = Verify(signedXml, "./default.crt")
 	assert.NoError(err)
 }

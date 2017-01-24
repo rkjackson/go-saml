@@ -75,9 +75,15 @@ func (r *Response) Validate(s *ServiceProviderSettings) error {
 		return errors.New("subject recipient mismatch, expected: " + s.AssertionConsumerServiceURL + " not " + r.Assertion.Subject.SubjectConfirmation.SubjectConfirmationData.Recipient)
 	}
 
-	err := Verify(r.originalString, s.IDPPublicCertPath)
+	xmlRef, err := Verify(r.originalString, s.IDPPublicCertPath)
 	if err != nil {
 		return err
+	}
+
+	r.Assertion = Assertion{}
+	e := xml.Unmarshal([]byte(xmlRef[0]), &r.Assertion)
+	if e != nil {
+		return e
 	}
 
 	//CHECK TIMES

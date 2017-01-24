@@ -72,7 +72,7 @@ func (r *AuthnRequest) Validate(publicCertPath string) error {
 
 	// TODO more validation
 
-	err := Verify(r.originalString, publicCertPath)
+	_, err := Verify(r.originalString, publicCertPath)
 	if err != nil {
 		return err
 	}
