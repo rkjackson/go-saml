@@ -26,7 +26,7 @@ func TestGetSignedRequest(t *testing.T) {
 	assert.NoError(err)
 	assert.NotEmpty(signedXML)
 
-	err = Verify(signedXML, sp.PublicCertPath)
+	_, err = Verify(signedXML, sp.PublicCertPath)
 	assert.NoError(err)
 }
 

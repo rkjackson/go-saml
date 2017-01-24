@@ -40,32 +40,32 @@ func Sign(xml string, privateKeyPath string) (string, error) {
 }
 
 // Verify validates the signature of an XML document
-func Verify(xml string, publicCertPath string) error {
+func Verify(xml string, publicCertPath string) ([]string, error) {
 	pemString, err := ioutil.ReadFile(publicCertPath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	pemBlock, _ := pem.Decode([]byte(pemString))
 	if pemBlock == nil {
-		return errors.New("Could not parse certificate")
+		return nil, errors.New("Could not parse certificate")
 	}
 
 	cert, err := x509.ParseCertificate(pemBlock.Bytes)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	validator, err := signedxml.NewValidator(xml)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	validator.Certificates = append(validator.Certificates, *cert)
 
-	err = validator.Validate()
+	xmlRef, err := validator.ValidateReferences()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return xmlRef, nil
 }
