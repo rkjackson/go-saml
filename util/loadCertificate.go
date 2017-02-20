@@ -12,12 +12,15 @@ func LoadCertificate(certPath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	cert := string(b)
 
+	return string(b), nil
+}
+
+func ParseCertificate(cert string) string {
 	re := regexp.MustCompile("---(.*)CERTIFICATE(.*)---")
 	cert = re.ReplaceAllString(cert, "")
 	cert = strings.Trim(cert, " \n")
 	cert = strings.Replace(cert, "\n", "", -1)
 
-	return cert, nil
+	return cert
 }

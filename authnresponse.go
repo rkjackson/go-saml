@@ -6,7 +6,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/Calpicow/go-saml/util"
+	"github.com/rkjackson/go-saml/util"
 )
 
 func ParseCompressedEncodedResponse(b64ResponseXML string) (*Response, error) {
@@ -75,7 +75,7 @@ func (r *Response) Validate(s *ServiceProviderSettings) error {
 		return errors.New("subject recipient mismatch, expected: " + s.AssertionConsumerServiceURL + " not " + r.Assertion.Subject.SubjectConfirmation.SubjectConfirmationData.Recipient)
 	}
 
-	xmlRef, err := Verify(r.originalString, s.IDPPublicCertPath)
+	xmlRef, err := Verify(r.originalString, s.IDPPublicCert)
 	if err != nil {
 		return err
 	}

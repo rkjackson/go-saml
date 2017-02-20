@@ -1,23 +1,25 @@
 package saml
 
-import "github.com/Calpicow/go-saml/util"
+import "github.com/rkjackson/go-saml/util"
 
 // ServiceProviderSettings provides settings to configure server acting as a SAML Service Provider.
 // Expect only one IDP per SP in this configuration. If you need to configure multipe IDPs for an SP
 // then configure multiple instances of this module
 type ServiceProviderSettings struct {
-	PublicCertPath              string
-	PrivateKeyPath              string
-	IDPSSOURL                   string
-	IDPSSODescriptorURL         string
-	IDPPublicCertPath           string
+	PublicCertPath      string
+	PrivateKeyPath      string
+	IDPSSOURL           string
+	IDPSSODescriptorURL string
+
+	IDPPublicCertPath string // optional - to load cert by URL
+	IDPPublicCert     string // full certificate
+
 	AssertionConsumerServiceURL string
 	SPSignRequest               bool
 
-	hasInit       bool
-	publicCert    string
-	privateKey    string
-	iDPPublicCert string
+	hasInit    bool
+	publicCert string
+	privateKey string
 }
 
 type IdentityProviderSettings struct {
@@ -41,7 +43,10 @@ func (s *ServiceProviderSettings) Init() (err error) {
 		}
 	}
 
-	s.iDPPublicCert, err = util.LoadCertificate(s.IDPPublicCertPath)
+	if len(s.IDPPublicCertPath) > 0 {
+		s.IDPPublicCert, err = util.LoadCertificate(s.IDPPublicCertPath)
+	}
+
 	if err != nil {
 		panic(err)
 	}
@@ -63,9 +68,9 @@ func (s *ServiceProviderSettings) PrivateKey() string {
 	return s.privateKey
 }
 
-func (s *ServiceProviderSettings) IDPPublicCert() string {
+func (s *ServiceProviderSettings) IDPPublicCertBody() string {
 	if !s.hasInit {
 		panic("Must call ServiceProviderSettings.Init() first")
 	}
-	return s.iDPPublicCert
+	return util.ParseCertificate(s.IDPPublicCert)
 }

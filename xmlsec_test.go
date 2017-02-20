@@ -4,7 +4,7 @@ import (
 	"encoding/xml"
 	"testing"
 
-	"github.com/Calpicow/go-saml/util"
+	"github.com/rkjackson/go-saml/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,7 +25,7 @@ func TestRequest(t *testing.T) {
 	assert.NoError(err)
 	assert.NotEmpty(signedXml)
 
-	_, err = Verify(signedXml, "./default.crt")
+	_, err = Verify(signedXml, cert)
 	assert.NoError(err)
 }
 
@@ -46,6 +46,6 @@ func TestResponse(t *testing.T) {
 	assert.NoError(err)
 	assert.NotEmpty(signedXml)
 
-	_, err = Verify(signedXml, "./default.crt")
+	_, err = Verify(signedXml, cert)
 	assert.NoError(err)
 }
