@@ -55,50 +55,55 @@ func (r *Response) Validate(s *ServiceProviderSettings) error {
 		return errors.New("missing ID attribute on SAML Response")
 	}
 
-	if len(r.Assertion.ID) == 0 {
-		return errors.New("no Assertions")
-	}
-
-	if len(r.Signature.SignatureValue.Value) == 0 && len(r.Assertion.Signature.SignatureValue.Value) == 0 {
-		return errors.New("no signature")
-	}
-
 	if r.Destination != s.AssertionConsumerServiceURL {
 		return errors.New("destination mismath expected: " + s.AssertionConsumerServiceURL + " not " + r.Destination)
 	}
 
-	if r.Assertion.Subject.SubjectConfirmation.Method != "urn:oasis:names:tc:SAML:2.0:cm:bearer" {
-		return errors.New("assertion method exception")
+	if len(r.Assertions) == 0 {
+		return errors.New("no Assertions")
 	}
+	for _, a := range r.Assertions {
+		if len(a.Signature.SignatureValue.Value) == 0 {
+			return errors.New("no signature")
+		}
 
-	if r.Assertion.Subject.SubjectConfirmation.SubjectConfirmationData.Recipient != s.AssertionConsumerServiceURL {
-		return errors.New("subject recipient mismatch, expected: " + s.AssertionConsumerServiceURL + " not " + r.Assertion.Subject.SubjectConfirmation.SubjectConfirmationData.Recipient)
-	}
+		if a.Subject.SubjectConfirmation.Method != "urn:oasis:names:tc:SAML:2.0:cm:bearer" {
+			return errors.New("assertion method exception")
+		}
 
-	xmlRef, err := Verify(r.originalString, s.IDPPublicCert)
-	if err != nil {
-		return err
-	}
+		if a.Subject.SubjectConfirmation.SubjectConfirmationData.Recipient != s.AssertionConsumerServiceURL {
+			return errors.New("subject recipient mismatch, expected: " + s.AssertionConsumerServiceURL + " not " + a.Subject.SubjectConfirmation.SubjectConfirmationData.Recipient)
+		}
 
-	r.Assertion = Assertion{}
-	e := xml.Unmarshal([]byte(xmlRef[0]), &r.Assertion)
-	if e != nil {
-		return e
-	}
+		_, err := Verify(r.originalString, s.IDPPublicCert)
+		// TODO: look at the xmlRef this returns and see if it's a better value to return
+		if err != nil {
+			return err
+		}
 
-	//CHECK TIMES
-	expires := r.Assertion.Subject.SubjectConfirmation.SubjectConfirmationData.NotOnOrAfter
-	notOnOrAfter, e := time.Parse(time.RFC3339, expires)
-	if e != nil {
-		return e
+		// This was one of the main problems, it's taking the first assertion no matter what
+		/*
+			r.Assertion = Assertion{}
+			e := xml.Unmarshal([]byte(xmlRef[0]), &r.Assertion)
+			if e != nil {
+				return e
+			}
+		*/
+		//CHECK TIMES
+		expires := a.Subject.SubjectConfirmation.SubjectConfirmationData.NotOnOrAfter
+		notOnOrAfter, e := time.Parse(time.RFC3339, expires)
+		if e != nil {
+			return e
+		}
+		if notOnOrAfter.Before(time.Now()) {
+			return errors.New("assertion has expired on: " + expires)
+		}
+		//TODO: check NotBefore
 	}
-	if notOnOrAfter.Before(time.Now()) {
-		return errors.New("assertion has expired on: " + expires)
-	}
-
 	return nil
 }
 
+/*
 func NewSignedResponse() *Response {
 	return &Response{
 		XMLName: xml.Name{
@@ -275,7 +280,7 @@ func (r *Response) AddAttribute(name, value string) {
 		},
 	})
 }
-
+*/
 func (r *Response) String() (string, error) {
 	b, err := xml.MarshalIndent(r, "", "    ")
 	if err != nil {
@@ -313,6 +318,7 @@ func (r *Response) CompressedEncodedSignedString(privateKeyPath string) (string,
 	return b64XML, nil
 }
 
+/*
 // GetAttribute by Name or by FriendlyName. Return blank string if not found
 func (r *Response) GetAttribute(name string) string {
 	for _, attr := range r.Assertion.AttributeStatement.Attributes {
@@ -322,7 +328,8 @@ func (r *Response) GetAttribute(name string) string {
 	}
 	return ""
 }
-
+*/
+/*
 func (r *Response) GetAttributeValues(name string) []string {
 	var values []string
 	for _, attr := range r.Assertion.AttributeStatement.Attributes {
@@ -334,3 +341,4 @@ func (r *Response) GetAttributeValues(name string) []string {
 	}
 	return values
 }
+*/

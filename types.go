@@ -178,19 +178,18 @@ type AssertionConsumerService struct {
 
 type Response struct {
 	XMLName      xml.Name
-	SAMLP        string `xml:"xmlns:samlp,attr"`
-	SAML         string `xml:"xmlns:saml,attr"`
-	SAMLSIG      string `xml:"xmlns:samlsig,attr"`
-	Destination  string `xml:"Destination,attr"`
-	ID           string `xml:"ID,attr"`
-	Version      string `xml:"Version,attr"`
-	IssueInstant string `xml:"IssueInstant,attr"`
-	InResponseTo string `xml:"InResponseTo,attr"`
-
-	Assertion Assertion `xml:"Assertion"`
-	Signature Signature `xml:"Signature"`
-	Issuer    Issuer    `xml:"Issuer"`
-	Status    Status    `xml:"Status"`
+	SAMLP        string      `xml:"xmlns:samlp,attr"`
+	SAML         string      `xml:"xmlns:saml,attr"`
+	SAMLSIG      string      `xml:"xmlns:samlsig,attr"`
+	Destination  string      `xml:"Destination,attr"`
+	ID           string      `xml:"ID,attr"`
+	Version      string      `xml:"Version,attr"`
+	IssueInstant string      `xml:"IssueInstant,attr"`
+	InResponseTo string      `xml:"InResponseTo,attr"`
+	Signature    Signature   `xml:"Signature"`
+	Assertions   []Assertion `xml:"Assertion"`
+	Issuer       Issuer      `xml:"Issuer"`
+	Status       Status      `xml:"Status"`
 
 	originalString string
 }
