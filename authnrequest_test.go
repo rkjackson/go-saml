@@ -71,3 +71,23 @@ func TestGetUnsignedRequestFromString(t *testing.T) {
 	assert.NoError(err)
 	assert.NotEmpty(authnRequest)
 }
+
+func TestServiceProviderSettings_GetAuthnRequest_ProtocolBinding(t *testing.T) {
+	protocolBindings := []string{
+		"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
+		"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
+	}
+
+	for _, binding := range protocolBindings {
+		sp := ServiceProviderSettings{
+			ProtocolBinding: binding,
+		}
+
+		err := sp.Init()
+		require.NoError(t, err)
+
+		req := sp.GetAuthnRequest()
+
+		assert.Equal(t, req.ProtocolBinding, binding)
+	}
+}

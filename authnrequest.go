@@ -21,7 +21,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/rkjackson/go-saml/util"
+	"github.com/riskive/go-saml/util"
 )
 
 func ParseCompressedEncodedRequest(b64RequestXML string) (*AuthnRequest, error) {
@@ -82,7 +82,7 @@ func (r *AuthnRequest) Validate(publicCertPath string) error {
 
 // GetSignedAuthnRequest returns a singed XML document that represents a AuthnRequest SAML document
 func (s *ServiceProviderSettings) GetAuthnRequest() *AuthnRequest {
-	r := NewAuthnRequest()
+	r := s.NewAuthnRequest()
 	r.AssertionConsumerServiceURL = s.AssertionConsumerServiceURL
 	r.Destination = s.IDPSSOURL
 	r.Issuer.Url = s.IDPSSODescriptorURL
@@ -110,7 +110,7 @@ func GetAuthnRequestURL(baseURL string, b64XML string, state string) (string, er
 	return u.String(), nil
 }
 
-func NewAuthnRequest() *AuthnRequest {
+func (s *ServiceProviderSettings) NewAuthnRequest() *AuthnRequest {
 	id := util.ID()
 	return &AuthnRequest{
 		XMLName: xml.Name{
@@ -120,7 +120,7 @@ func NewAuthnRequest() *AuthnRequest {
 		SAML:                        "urn:oasis:names:tc:SAML:2.0:assertion",
 		SAMLSIG:                     "http://www.w3.org/2000/09/xmldsig#",
 		ID:                          id,
-		ProtocolBinding:             "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
+		ProtocolBinding:             s.ProtocolBinding,
 		Version:                     "2.0",
 		AssertionConsumerServiceURL: "", // caller must populate ar.AppSettings.AssertionConsumerServiceURL,
 		Issuer: Issuer{
